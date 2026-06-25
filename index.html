@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Studio Photo — Online Photo Editor</title>
+<meta name="description" content="Free photo editor with film presets, filters, and color grading. No sign-up required.">
+<meta name="theme-color" content="#111318">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111318'/%3E%3Cpath d='M46 30c0-4.4-3.6-8-8-8-.5 0-1 .1-1.5.2C34.9 18.9 31 16 26.5 16 20.7 16 16 20.7 16 26.5c0 .2 0 .3 0 .5C13.2 28 11 30.5 11 33.5 11 36.5 13.5 39 16.5 39h27c3 0 5.5-2.5 5.5-5.5 0-.2 0-.3-.1-.5C48.1 32.3 47 31.2 46 30z' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════
+   BASE
+════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#111318;
+  --bg2:#181c23;
+  --bg3:#1e2330;
+  --border:#252d3a;
+  --border2:#2e3847;
+  --text:#e8edf3;
+  --text2:#9aa5b8;
+  --accent:#4f8ef7;
+  --accent-g:linear-gradient(135deg,#4f8ef7,#8b5cf6);
+  --green:#22c55e;
+  --red:#ef4444;
+  --r:10px;
+  --r-sm:7px;
+  --t:.18s ease;
+  --hdr:52px;
+  --toolbar:48px;
+  --panel:290px;
+}
+
+[data-theme="light"]{
+  --bg:#f0f2f5;
+  --bg2:#ffffff;
+  --bg3:#e8eaed;
+  --border:#dde1e7;
+  --border2:#c8cdd5;
+  --text:#0f1623;
+  --text2:#5a6478;
+  --accent:#2563eb;
+  --green:#16a34a;
+}
+
+html,body{height:100%;overflow:hidden;}
+
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  font-size:13px;background:var(--bg);color:var(--text);
+  display:flex;flex-direction:column;
+}
+
+/* ════════════════════════════════
+   HEADER
+════════════════════════════════ */
+.hdr{
+  height:var(--hdr);flex-shrink:0;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 14px;gap:10px;z-index:100;
+}
+
+.logo{
+  display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;
+  color:var(--text);text-decoration:none;flex-shrink:0;
+}
+
+.logo-ico{
+  width:30px;height:30px;border-radius:8px;
+  background:var(--accent-g);display:flex;align-items:center;justify-content:center;
+}
+
+.logo-ico svg{width:17px;height:17px;fill:#fff;}
+
+.hdr-right{display:flex;align-items:center;gap:6px;}
+
+.pill{
+  display:flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:500;color:var(--text2);
+  background:var(--bg3);border:1px solid var(--border);
+  padding:4px 9px;border-radius:20px;white-space:nowrap;
+}
+
+.pill .dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0;animation:blink 2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+.icon-btn{
+  width:32px;height:32px;border-radius:7px;border:1px solid var(--border);
+  background:var(--bg3);color:var(--text2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+  transition:all var(--t);flex-shrink:0;
+}
+
+.icon-btn:hover{color:var(--text);border-color:var(--border2);}
+
+/* ════════════════════════════════
+   TOOLBAR (secondary)
+════════════════════════════════ */
+.toolbar{
+  height:var(--toolbar);flex-shrink:0;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 12px;gap:6px;overflow-x:auto;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+}
+.toolbar::-webkit-scrollbar{display:none;}
+
+.tool-btn{
+  display:flex;align-items:center;gap:5px;
+  padding:6px 11px;border-radius:7px;border:1px solid transparent;
+  background:transparent;color:var(--text2);font-family:inherit;
+  font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;
+  transition:all var(--t);flex-shrink:0;
+}
+.tool-btn:hover{background:var(--bg3);color:var(--text);}
+.tool-btn.active{background:var(--bg3);color:var(--accent);border-color:var(--border);}
+.tool-btn svg{width:14px;height:14px;flex-shrink:0;}
+.tool-sep{width:1px;height:24px;background:var(--border);flex-shrink:0;margin:0 2px;}
+
+/* ════════════════════════════════
+   WORKSPACE
+════════════════════════════════ */
+.workspace{
+  flex:1;display:flex;overflow:hidden;position:relative;
+}
+
+/* ── Canvas area ── */
+.canvas-area{
+  flex:1;overflow:hidden;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+
+.canvas-wrap{
+  position:relative;display:flex;align-items:center;justify-content:center;
+  width:100%;height:100%;
+}
+
+canvas#preview{
+  max-width:100%;max-height:100%;
+  object-fit:contain;display:block;
+  box-shadow:0 8px 40px rgba(0,0,0,.5);
+}
+
+.drop-overlay{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:12px;cursor:pointer;
+}
+
+.drop-box{
+  border:2px dashed var(--border2);border-radius:14px;
+  padding:48px 36px;text-align:center;
+  background:var(--bg2);transition:all var(--t);max-width:340px;width:90%;
+}
+
+.drop-box:hover,.drop-box.drag{border-color:var(--accent);background:var(--bg3);}
+
+.drop-icon{font-size:38px;margin-bottom:12px;}
+.drop-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:5px;}
+.drop-sub{font-size:12px;color:var(--text2);}
+
+.upload-btn-big{
+  margin-top:14px;display:inline-flex;align-items:center;gap:7px;
+  padding:10px 22px;border-radius:8px;
+  background:var(--accent-g);color:#fff;
+  font-family:inherit;font-size:13px;font-weight:600;
+  cursor:pointer;border:none;transition:opacity var(--t);
+}
+.upload-btn-big:hover{opacity:.88;}
+
+/* ── Panel (right sidebar) ── */
+.panel{
+  width:var(--panel);flex-shrink:0;
+  background:var(--bg2);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+
+.panel-tabs{
+  display:flex;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+
+.ptab{
+  flex:1;padding:10px 4px;text-align:center;font-size:11px;font-weight:600;
+  color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;
+  transition:all var(--t);background:transparent;border:none;font-family:inherit;
+  border-bottom:2px solid transparent;
+}
+.ptab:hover{color:var(--text);}
+.ptab.on{color:var(--accent);border-bottom-color:var(--accent);}
+
+.panel-body{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.panel-body::-webkit-scrollbar{width:4px;}
+.panel-body::-webkit-scrollbar-track{background:transparent;}
+.panel-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+/* pane visibility */
+.pane{display:none;}
+.pane.on{display:block;}
+
+/* ── Section headers inside panel ── */
+.sec{padding:12px 12px 6px;}
+.sec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);opacity:.7;}
+
+/* ── Preset grid ── */
+.preset-scroll{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:4px;
+  padding:0 12px 12px;
+}
+
+.pi{
+  position:relative;cursor:pointer;border-radius:8px;overflow:hidden;
+  aspect-ratio:1/1;border:2px solid transparent;transition:all .2s;min-height:48px;
+}
+.pi:hover{transform:scale(1.05);border-color:var(--accent);}
+.pi.on{border-color:var(--accent);box-shadow:0 0 0 2px rgba(79,142,247,.25);}
+.pi-bg{position:absolute;inset:0;background-size:cover;}
+.pi-name{
+  position:absolute;bottom:0;left:0;right:0;font-size:7px;
+  background:linear-gradient(transparent,rgba(0,0,0,.8));
+  color:#fff;font-size:8.5px;font-weight:600;
+  padding:10px 4px 3px;text-align:center;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.pi-check{
+  position:absolute;top:3px;right:3px;
+  width:14px;height:14px;border-radius:50%;
+  background:var(--accent);color:#fff;font-size:8px;font-weight:700;
+  display:none;align-items:center;justify-content:center;
+}
+.pi.on .pi-check{display:flex;}
+
+/* preset category tabs */
+.cat-tabs{
+  display:flex;overflow-x:auto;gap:4px;padding:8px 12px;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:0;
+}
+.cat-tabs::-webkit-scrollbar{display:none;}
+
+.ctab{
+  flex-shrink:0;padding:4px 10px;border-radius:20px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--text2);font-family:inherit;font-size:11px;font-weight:500;
+  cursor:pointer;transition:all var(--t);white-space:nowrap;
+}
+.ctab:hover{color:var(--text);border-color:var(--border2);}
+.ctab.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+/* ── Sliders ── */
+.sliders{padding:0 12px 12px;display:flex;flex-direction:column;gap:2px;}
+
+.sl-row{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 0;border-bottom:1px solid var(--border);
+}
+.sl-row:last-child{border-bottom:none;}
+
+.sl-label{flex:0 0 72px;font-size:11px;font-weight:500;color:var(--text2);}
+
+.sl-wrap{flex:1;position:relative;}
+
+input[type="range"]{
+  width:100%;height:3px;border-radius:2px;
+  background:var(--border2);outline:none;cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+}
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:13px;height:13px;border-radius:50%;
+  background:var(--accent);cursor:pointer;transition:transform .15s;
+  box-shadow:0 0 0 3px rgba(79,142,247,.2);
+}
+input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.3);}
+input[type="range"]::-moz-range-thumb{
+  width:13px;height:13px;border-radius:50%;
+  background:var(--accent);cursor:pointer;border:none;
+}
+input[type="range"]::-moz-range-track{background:transparent;border:none;}
+
+.sl-val{
+  flex:0 0 28px;text-align:right;
+  font-size:11px;font-weight:600;color:var(--accent);
+  font-variant-numeric:tabular-nums;
+}
+
+/* ── Download buttons ── */
+.dl-btns{padding:12px;display:flex;flex-direction:column;gap:7px;}
+
+.btn{
+  padding:9px 14px;border-radius:8px;border:none;
+  font-family:inherit;font-size:12px;font-weight:600;
+  cursor:pointer;transition:all var(--t);
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  width:100%;
+}
+.btn:active{transform:scale(.97);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+.btn-primary{background:var(--accent-g);color:#fff;}
+.btn-primary:hover:not(:disabled){filter:brightness(1.1);}
+
+.btn-ghost{background:var(--bg3);color:var(--text2);border:1px solid var(--border);}
+.btn-ghost:hover:not(:disabled){color:var(--text);border-color:var(--border2);}
+
+/* ── Contact Me ── */
+.contact-links{
+  display:flex;flex-direction:row;gap:10px;padding:4px 0;
+  justify-content:center;
+}
+.contact-link{
+  display:flex;align-items:center;justify-content:center;
+  width:44px;height:44px;border-radius:12px;
+  border:1px solid var(--border);background:var(--bg3);
+  color:var(--text);text-decoration:none;
+  font-size:12px;font-weight:500;
+  transition:all var(--t);flex-shrink:0;
+}
+.contact-link:hover{border-color:var(--border2);background:var(--bg);transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.3);}
+.contact-link svg{flex-shrink:0;width:22px;height:22px;}
+.contact-link span{display:none;}
+
+.stars{display:flex;gap:5px;font-size:19px;}
+.star{color:var(--border2);cursor:pointer;transition:all .15s;}
+.star:hover,.star.on{color:#f59e0b;transform:scale(1.15);}
+
+.reset-row{padding:0 12px 12px;display:flex;gap:6px;}
+
+/* ── Progress bar ── */
+.prog{height:2px;background:var(--border);display:none;overflow:hidden;}
+.prog.show{display:block;}
+.prog-fill{height:100%;width:0%;background:var(--accent-g);transition:width .3s;}
+
+/* ════════════════════════════════
+   BOTTOM STATUS BAR
+════════════════════════════════ */
+.statusbar{
+  height:26px;flex-shrink:0;
+  background:var(--bg2);border-top:1px solid var(--border);
+  display:flex;align-items:center;padding:0 12px;gap:16px;
+  font-size:10px;color:var(--text2);
+}
+.statusbar span{white-space:nowrap;}
+
+/* ════════════════════════════════
+   TOAST
+════════════════════════════════ */
+#toast{
+  position:fixed;bottom:36px;left:50%;
+  transform:translateX(-50%) translateY(16px);
+  background:var(--bg2);border:1px solid var(--border);
+  padding:9px 18px;border-radius:22px;
+  font-size:12px;font-weight:500;
+  box-shadow:0 6px 24px rgba(0,0,0,.4);
+  opacity:0;pointer-events:none;z-index:9999;
+  transition:opacity .2s,transform .2s;white-space:nowrap;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ════════════════════════════════
+   FOOTER (below canvas area on mobile)
+════════════════════════════════ */
+.footer-section{
+  display:none; /* shown on mobile */
+  background:var(--bg2);border-top:1px solid var(--border);
+  padding:18px 16px;
+}
+
+/* ════════════════════════════════
+   MOBILE  ≤ 700px
+════════════════════════════════ */
+@media(max-width:700px){
+  :root{--panel:100%;}
+
+  html,body{height:auto;overflow:auto;}
+
+  .workspace{
+    flex-direction:column;overflow:visible;height:auto;
+  }
+
+  .canvas-area{
+    height:54vw;min-height:220px;max-height:340px;
+    flex-shrink:0;
+  }
+
+  .panel{
+    width:100%;border-left:none;border-top:1px solid var(--border);
+    height:auto;overflow:visible;flex-shrink:0;
+  }
+
+  .panel-body{overflow:visible;height:auto;}
+
+  body{overflow-y:auto;}
+
+  .toolbar{padding:0 8px;gap:4px;}
+  .tool-btn{padding:5px 8px;font-size:11px;}
+
+  .preset-scroll{grid-template-columns:repeat(4,1fr);}
+
+  .footer-section{display:block;}
+
+  .statusbar{display:none;}
+
+  /* Feedback & footer at bottom */
+  .footer-section{order:10;}
+}
+
+@media(max-width:400px){
+  .preset-scroll{grid-template-columns:repeat(3,1fr);}
+  .logo span{display:none;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important;}
+}
+</style>
+
+<!-- FILTER ENGINE NOTE:
+Preset Fuji/Kodak/VSCO/Photoshop saat ini masih berbasis parameter simulasi.
+Untuk menyamai karakter asli 95-100% diperlukan LUT/ICC profile asli atau engine color grading khusus.
+-->
+
+</head>
+<body>
+
+<!-- ════ HEADER ════ -->
+<header class="hdr">
+  <div class="logo">
+    <div class="logo-ico">
+      <svg viewBox="0 0 24 24"><path d="M18 10h-.3A6 6 0 0 0 6.1 11a4 4 0 1 0 0 8H18a4 4 0 0 0 0-8z"/></svg>
+    </div>
+    <span>Studio Photo</span>
+  </div>
+  <div class="hdr-right">
+    <div class="pill"><span class="dot"></span><span id="visitorCount">...</span></div>
+    <button class="icon-btn lang-btn" id="langBtn" title="Switch Language" style="width:auto;padding:0 10px;font-size:11px;font-weight:600;letter-spacing:.03em;">ID</button>
+    <button class="icon-btn" id="themeBtn" title="Toggle theme">🌙</button>
+  </div>
+</header>
+
+<!-- ════ TOOLBAR ════ -->
+<div class="toolbar">
+  <button class="tool-btn" id="tbUpload">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    <span data-i18n="upload">Upload</span>
+  </button>
+  <div class="tool-sep"></div>
+  <button class="tool-btn active" id="tbAdjust">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+    <span data-i18n="adjust">Adjust</span>
+  </button>
+  <button class="tool-btn" id="tbFilters">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 1 0 4.93 19.07"/></svg>
+    <span data-i18n="filterPreset">Filter & Preset</span>
+  </button>
+  <button class="tool-btn" id="tbDownload">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    <span data-i18n="download">Download</span>
+  </button>
+</div>
+
+<!-- ════ WORKSPACE ════ -->
+<div class="workspace">
+
+  <!-- Canvas -->
+  <div class="canvas-area" id="canvasArea">
+    <div class="canvas-wrap">
+      <canvas id="preview" style="display:none;"></canvas>
+      <div class="drop-overlay" id="dropOverlay">
+        <div class="drop-box" id="dropZone">
+          <div class="drop-icon">🖼️</div>
+          <div class="drop-title" data-i18n="dropTitle">Drag & Drop Photo</div>
+          <div class="drop-sub" data-i18n="dropSub">JPG, PNG, WEBP, GIF · Max 20 MB</div>
+          <button class="upload-btn-big" id="uploadBtnBig">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span data-i18n="choosePhoto">Choose Photo</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="prog" id="progBar"><div class="prog-fill" id="progFill"></div></div>
+    <input type="file" id="fileInput" accept="image/*" style="display:none;">
+  </div>
+
+  <!-- Panel -->
+  <div class="panel" id="panel">
+    <div class="panel-tabs">
+      <button class="ptab on" data-pane="adjust" data-i18n="adjust">Adjust</button>
+      <button class="ptab" data-pane="filters" data-i18n="filter">Filter</button>
+      <button class="ptab" data-pane="download" data-i18n="download">Download</button>
+    </div>
+
+    <div class="panel-body">
+
+      <!-- ── ADJUST PANE ── -->
+      <div class="pane on" id="pane-adjust">
+        <div class="sec"><div class="sec-title" data-i18n="tone">Tone</div></div>
+        <div class="sliders" id="sliders-tone">
+          <div class="sl-row">
+            <span class="sl-label" data-i18n="brightness">Brightness</span>
+            <div class="sl-wrap"><input type="range" id="brightness" min="-60" max="60" value="0"></div>
+            <span class="sl-val" id="val-brightness">0</span>
+          </div>
+          <div class="sl-row">
+            <span class="sl-label" data-i18n="contrast">Contrast</span>
+            <div class="sl-wrap"><input type="range" id="contrast" min="-50" max="80" value="0"></div>
+            <span class="sl-val" id="val-contrast">0</span>
+          </div>
+          <div class="sl-row">
+            <span class="sl-label">Highlights</span>
+            <div class="sl-wrap"><input type="range" id="highlights" min="-50" max="50" value="0"></div>
+            <span class="sl-val" id="val-highlights">0</span>
+          </div>
+          <div class="sl-row">
+            <span class="sl-label">Shadows</span>
+            <div class="sl-wrap"><input type="range" id="shadows" min="-30" max="50" value="0"></div>
+            <span class="sl-val" id="val-shadows">0</span>
+          </div>
+        </div>
+
+        <div class="sec"><div class="sec-title" data-i18n="color">Color</div></div>
+        <div class="sliders">
+          <div class="sl-row">
+            <span class="sl-label" data-i18n="saturation">Saturation</span>
+            <div class="sl-wrap"><input type="range" id="saturation" min="-100" max="100" value="0"></div>
+            <span class="sl-val" id="val-saturation">0</span>
+          </div>
+          <div class="sl-row">
+            <span class="sl-label" data-i18n="warmth">Warmth</span>
+            <div class="sl-wrap"><input type="range" id="warmth" min="-50" max="50" value="0"></div>
+            <span class="sl-val" id="val-warmth">0</span>
+          </div>
+          <div class="sl-row">
+            <span class="sl-label">Hue</span>
+            <div class="sl-wrap"><input type="range" id="hue" min="-180" max="180" value="0"></div>
+            <span class="sl-val" id="val-hue">0</span>
+          </div>
+          <div class="sl-row">
+            <span class="sl-label">Vibrance</span>
+            <div class="sl-wrap"><input type="range" id="vibrance" min="-50" max="50" value="0"></div>
+            <span class="sl-val" id="val-vibrance">0</span>
+          </div>
+        </div>
+
+        <div class="sec"><div class="sec-title" data-i18n="detail">Detail</div></div>
+        <div class="sliders">
+          <div class="sl-row">
+            <span class="sl-label">Clarity</span>
+            <div class="sl-wrap"><input type="range" id="clarity" min="-20" max="30" value="0"></div>
+            <span class="sl-val" id="val-clarity">0</span>
+          </div>
+          <div class="sl-row">
+            <span class="sl-label" data-i18n="sharpen">Sharpen</span>
+            <div class="sl-wrap"><input type="range" id="sharpen" min="0" max="20" value="0"></div>
+            <span class="sl-val" id="val-sharpen">0</span>
+          </div>
+          <div class="sl-row">
+            <span class="sl-label">Vignette</span>
+            <div class="sl-wrap"><input type="range" id="vignette" min="0" max="60" value="0"></div>
+            <span class="sl-val" id="val-vignette">0</span>
+          </div>
+          <div class="sl-row">
+            <span class="sl-label">Grain</span>
+            <div class="sl-wrap"><input type="range" id="grain" min="0" max="30" value="0"></div>
+            <span class="sl-val" id="val-grain">0</span>
+          </div>
+        </div>
+
+        <div class="reset-row">
+          <button class="btn btn-ghost" id="btnReset" style="font-size:12px;">↩ <span data-i18n="resetAll">Reset All</span></button>
+        </div>
+      </div>
+
+      <!-- ── FILTERS PANE ── -->
+      <div class="pane" id="pane-filters">
+        <div class="cat-tabs" id="catTabs"></div>
+        <div class="preset-scroll" id="presetGrid"></div>
+        <div class="reset-row" style="padding:4px 12px 12px;">
+          <button class="btn btn-ghost" id="btnResetFilter" style="font-size:12px;">↩ <span data-i18n="resetAll">Reset All</span></button>
+        </div>
+      </div>
+
+      <!-- ── DOWNLOAD PANE ── -->
+      <div class="pane" id="pane-download">
+        <div class="sec"><div class="sec-title" data-i18n="export">Export</div></div>
+        <div style="padding:8px 12px 4px;">
+          <div style="font-size:11px;color:var(--text2);line-height:1.5;">Pilih resolusi output:</div>
+        </div>
+        <div class="dl-btns">
+          <button class="btn btn-primary" id="btnHD" style="gap:8px;justify-content:flex-start;padding:10px 14px;">
+            <span style="font-size:16px;">⬇</span>
+            <span style="display:flex;flex-direction:column;align-items:flex-start;line-height:1.3;">
+              <span style="font-size:13px;font-weight:700;">HD</span>
+              <span style="font-size:10px;opacity:.8;font-weight:400;">Maks 1920 x 1080 px</span>
+            </span>
+          </button>
+          <button class="btn btn-primary" id="btn4K" style="gap:8px;justify-content:flex-start;padding:10px 14px;background:linear-gradient(135deg,#8b5cf6,#ec4899);">
+            <span style="font-size:16px;">⬇</span>
+            <span style="display:flex;flex-direction:column;align-items:flex-start;line-height:1.3;">
+              <span style="font-size:13px;font-weight:700;">4K Ultra HD</span>
+              <span style="font-size:10px;opacity:.8;font-weight:400;">Maks 3840 x 2160 px</span>
+            </span>
+          </button>
+          <button class="btn btn-ghost" id="btnOrig" style="gap:8px;justify-content:flex-start;padding:10px 14px;">
+            <span style="font-size:16px;">⬇</span>
+            <span style="display:flex;flex-direction:column;align-items:flex-start;line-height:1.3;">
+              <span style="font-size:13px;font-weight:700;"><span data-i18n="origSize">Original Size</span></span>
+              <span style="font-size:10px;opacity:.7;font-weight:400;" id="origSizeLabel">Resolusi asli foto</span>
+            </span>
+          </button>
+        </div>
+        <div style="padding:4px 12px 10px;">
+          <div style="font-size:10px;color:var(--text2);opacity:.6;line-height:1.5;">📱 iOS: tekan &amp; tahan gambar untuk menyimpan</div>
+        </div>
+      </div>
+
+    </div><!-- /panel-body -->
+  </div><!-- /panel -->
+</div><!-- /workspace -->
+
+<!-- ════ STATUSBAR (desktop) ════ -->
+<div class="statusbar">
+  <span id="imgInfo" data-i18n-default="noImage">No image loaded</span>
+  <span>Studio Photo v2</span>
+</div>
+
+<!-- ════ FOOTER (mobile + desktop) ════ -->
+<div class="footer-section" id="footerSection">
+  <!-- Contact Me -->
+  <div style="margin-bottom:20px;">
+    <div class="sec-title" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);opacity:.7;margin-bottom:10px;">Contact Me</div>
+    <div class="contact-links">
+      <a class="contact-link" href="https://www.instagram.com/ritwanristanto" target="_blank" rel="noopener noreferrer" title="Instagram: @ritwanristanto">
+        <svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f09433"/><stop offset="25%" stop-color="#e6683c"/><stop offset="50%" stop-color="#dc2743"/><stop offset="75%" stop-color="#cc2366"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs>
+          <rect x="2" y="2" width="20" height="20" rx="5.5" ry="5.5" fill="url(#ig-grad)"/>
+          <circle cx="12" cy="12" r="4.5" stroke="#fff" stroke-width="1.8" fill="none"/>
+          <circle cx="17.5" cy="6.5" r="1.2" fill="#fff"/>
+        </svg>
+        <span>@ritwanristanto</span>
+      </a>
+      <a class="contact-link" href="javascript:void(0)" onclick="copyEmail();return false;" title="Salin email: ritwan.ristanto@gmail.com">
+        <svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="4" width="20" height="16" rx="3" fill="#EA4335"/>
+          <path d="M2 7l10 7 10-7" stroke="#fff" stroke-width="2" fill="none" stroke-linejoin="round"/>
+        </svg>
+        <span>ritwan.ristanto@gmail.com</span>
+      </a>
+      <a class="contact-link" href="https://github.com/RitwanRistanto" target="_blank" rel="noopener noreferrer" title="GitHub: RitwanRistanto">
+        <svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path fill="currentColor" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.167 6.839 9.49.5.09.682-.217.682-.482 0-.237-.009-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.268 2.75 1.026A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.115 2.504.337 1.909-1.294 2.748-1.026 2.748-1.026.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.308.678.917.678 1.848 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.481C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
+        </svg>
+        <span>RitwanRistanto</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Donation -->
+  <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 14px;margin-bottom:18px;">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);opacity:.7;margin-bottom:8px;">☕ Support the Developer</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">Donate USDC via Solana:</div>
+    <div style="display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;">
+      <code style="font-size:10px;color:var(--text);word-break:break-all;flex:1;line-height:1.5;">Ah9kqroxTGiMH7uruBv3GUDEeLbrVkgkH6KpNX3R1Fkb</code>
+      <button data-copy-wallet onclick="copyWallet()" style="flex-shrink:0;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .18s ease;">Copy</button>
+    </div>
+    <div style="font-size:10px;color:var(--text2);opacity:.6;margin-top:6px;">Network: Solana · Token: USDC</div>
+  </div>
+
+  <!-- Credit -->
+  <div style="text-align:center;padding:8px 0 4px;border-top:1px solid var(--border);">
+    <div style="font-size:12px;color:var(--text2);margin-bottom:2px;">Made with ❤️ by</div>
+    <div style="font-size:14px;font-weight:600;color:var(--text);">Ritwan Ristanto</div>
+    <div style="font-size:10px;color:var(--text2);opacity:.5;margin-top:4px;">© 2025 Studio Photo · All rights reserved</div>
+  </div>
+</div>
+
+<!-- ════ DESKTOP FOOTER (always visible at bottom of panel) ════ -->
+<div id="desktopFooter" style="display:none;"></div>
+
+<div id="toast"></div>
+
+<!-- ════════════════════════════════
+   PANEL: Feedback + Donasi + Credit (desktop, injected)
+════════════════════════════════ -->
+
+<script>
+/* ─────────────────────────────────────────────────
+   PRESETS
+───────────────────────────────────────────────── */
+const PRESETS={
+  "Kodak":{
+    // Kodak Gold 200 — warm, slightly golden midtones, punchy colors
+    "Gold 200"     :{brightness:6,  contrast:10, saturation:18, warmth:18, highlights:-5,  shadows:8,   hue:3,   clarity:2,  sharpen:5,  vignette:10, grain:9,  vibrance:6},
+    // Portra 160 — skin-tone optimized, low contrast, subtle grain
+    "Portra 160"   :{brightness:4,  contrast:3,  saturation:4,  warmth:10, highlights:-8,  shadows:10,  hue:0,   clarity:-3, sharpen:3,  vignette:7,  grain:4,  vibrance:3},
+    // Portra 400 — slightly cooler highlight, excellent shadow lift
+    "Portra 400"   :{brightness:6,  contrast:5,  saturation:6,  warmth:8,  highlights:-10, shadows:12,  hue:0,   clarity:0,  sharpen:3,  vignette:10, grain:10, vibrance:4},
+    // Portra 800 — pushed grain, lowered saturation, lifted shadows
+    "Portra 800"   :{brightness:8,  contrast:2,  saturation:-2, warmth:12, highlights:-14, shadows:14,  hue:0,   clarity:-3, sharpen:2,  vignette:14, grain:18, vibrance:2},
+    // Ektar 100 — ultra-vivid, cyan shadows, punchy reds
+    "Ektar 100"    :{brightness:2,  contrast:18, saturation:40, warmth:-8, highlights:8,   shadows:-8,  hue:-5,  clarity:12, sharpen:9,  vignette:8,  grain:2,  vibrance:14},
+    // Kodachrome 64 — iconic red/blue boost, deep contrast
+    "Kodachrome"   :{brightness:0,  contrast:22, saturation:28, warmth:-5, highlights:6,   shadows:-8,  hue:-3,  clarity:10, sharpen:7,  vignette:12, grain:5,  vibrance:10},
+    // T-Max 400 — clinical B&W, ultra-sharp
+    "T-Max 400"    :{brightness:-2, contrast:25, saturation:-100,warmth:0, highlights:10,  shadows:-10, hue:0,   clarity:14, sharpen:10, vignette:14, grain:10, vibrance:0},
+    // UltraMax 400 — consumer vivid, warm, high grain
+    "UltraMax 400" :{brightness:5,  contrast:12, saturation:22, warmth:12, highlights:-3,  shadows:6,   hue:2,   clarity:4,  sharpen:5,  vignette:10, grain:14, vibrance:6},
+    // Gold 400 — warm orange-golden, higher grain than Gold 200
+    "Gold 400"     :{brightness:8,  contrast:8,  saturation:20, warmth:22, highlights:0,   shadows:8,   hue:3,   clarity:2,  sharpen:4,  vignette:12, grain:16, vibrance:4},
+    // ColorPlus 200 — budget film, pleasant warm tones
+    "ColorPlus 200":{brightness:5,  contrast:6,  saturation:14, warmth:10, highlights:0,   shadows:4,   hue:0,   clarity:0,  sharpen:3,  vignette:8,  grain:7,  vibrance:3},
+    // Ektachrome E100 — slide film, cool shadows, vivid blues
+    "Ektachrome"   :{brightness:3,  contrast:15, saturation:32, warmth:-12,highlights:8,   shadows:-8,  hue:-6,  clarity:10, sharpen:8,  vignette:8,  grain:3,  vibrance:12},
+    // Pro Image 100 — neutral pro film, slight warm bias
+    "Pro Image 100":{brightness:4,  contrast:7,  saturation:12, warmth:8,  highlights:-4,  shadows:7,   hue:0,   clarity:3,  sharpen:4,  vignette:9,  grain:5,  vibrance:4},
+    // Portra 160VC — vibrant colour variant
+    "Portra 160VC" :{brightness:5,  contrast:9,  saturation:22, warmth:10, highlights:-5,  shadows:6,   hue:0,   clarity:3,  sharpen:5,  vignette:10, grain:6,  vibrance:8},
+  },
+  "Fuji":{
+    // Velvia 50 — hyper-saturated, high contrast landscape film
+    "Velvia 50"    :{brightness:1,  contrast:22, saturation:50, warmth:-5, highlights:10,  shadows:-10, hue:-4,  clarity:14, sharpen:12, vignette:10, grain:1,  vibrance:18},
+    // Velvia 100 — slightly tamer Velvia
+    "Velvia 100"   :{brightness:1,  contrast:20, saturation:44, warmth:-3, highlights:8,   shadows:-8,  hue:-3,  clarity:12, sharpen:10, vignette:8,  grain:2,  vibrance:14},
+    // Astia 100F — soft portrait slide film
+    "Astia 100F"   :{brightness:5,  contrast:0,  saturation:-6, warmth:6,  highlights:-2,  shadows:12,  hue:0,   clarity:-3, sharpen:3,  vignette:6,  grain:4,  vibrance:2},
+    // Provia 100F — balanced slide film, accurate colors
+    "Provia 100F"  :{brightness:3,  contrast:8,  saturation:12, warmth:0,  highlights:0,   shadows:0,   hue:0,   clarity:5,  sharpen:5,  vignette:6,  grain:3,  vibrance:4},
+    // Pro 400H — pastel skin tones, muted greens
+    "Pro 400H"     :{brightness:8,  contrast:-4, saturation:-14,warmth:14, highlights:-12, shadows:14,  hue:0,   clarity:-2, sharpen:0,  vignette:10, grain:9,  vibrance:-2},
+    // Acros 100 — Fuji's finest B&W, inky blacks
+    "Acros 100"    :{brightness:-2, contrast:18, saturation:-100,warmth:0, highlights:6,   shadows:-8,  hue:0,   clarity:12, sharpen:9,  vignette:14, grain:7,  vibrance:0},
+    // Eterna 250 — cinema negative, restrained colors
+    "Eterna 250"   :{brightness:-3, contrast:-6, saturation:-18,warmth:5,  highlights:-14, shadows:12,  hue:0,   clarity:-2, sharpen:2,  vignette:10, grain:6,  vibrance:-4},
+    // Superia 400 — Fuji's consumer color film, cool bias
+    "Superia 400"  :{brightness:4,  contrast:11, saturation:10, warmth:-8, highlights:3,   shadows:-4,  hue:-6,  clarity:5,  sharpen:6,  vignette:8,  grain:12, vibrance:3},
+    // Superia 800 — pushed, higher grain, slightly desaturated
+    "Superia 800"  :{brightness:6,  contrast:9,  saturation:6,  warmth:-5, highlights:2,   shadows:-3,  hue:-5,  clarity:4,  sharpen:5,  vignette:10, grain:16, vibrance:2},
+    // Natura 1600 — low-light film, huge grain, warm lift
+    "Natura 1600"  :{brightness:12, contrast:-10,saturation:-22,warmth:10, highlights:-18, shadows:18,  hue:0,   clarity:-8, sharpen:0,  vignette:20, grain:26, vibrance:-6},
+    // Reala 100 — accurate colors, slight neutral warmth
+    "Reala 100"    :{brightness:2,  contrast:6,  saturation:6,  warmth:3,  highlights:-3,  shadows:5,   hue:0,   clarity:3,  sharpen:4,  vignette:7,  grain:4,  vibrance:2},
+    // Sensia 200 — slide film, punchy colors
+    "Sensia 200"   :{brightness:3,  contrast:16, saturation:32, warmth:-3, highlights:7,   shadows:-7,  hue:-2,  clarity:11, sharpen:7,  vignette:9,  grain:4,  vibrance:9},
+    // Fuji 90s — classic consumer, warm punchy
+    "Fuji 90s"     :{brightness:6,  contrast:14, saturation:24, warmth:6,  highlights:8,   shadows:-8,  hue:-4,  clarity:8,  sharpen:7,  vignette:14, grain:12, vibrance:9},
+    // Neopan 400 — B&W street film, gritty
+    "Neopan 400"   :{brightness:-2, contrast:20, saturation:-100,warmth:0, highlights:7,   shadows:-7,  hue:0,   clarity:14, sharpen:9,  vignette:16, grain:18, vibrance:0},
+  },
+  "Sony":{
+    // Camera Picture Profiles — simulating Sony in-camera looks
+    // Standard (ST) — neutral, slightly punchy
+    "ST Standard"  :{brightness:0,  contrast:6,  saturation:2,  warmth:0,  highlights:0,   shadows:0,   hue:0,   clarity:4,  sharpen:6,  vignette:0,  grain:0,  vibrance:0},
+    // Portrait (PT) — soft skin, reduced clarity
+    "PT Portrait"  :{brightness:6,  contrast:-6, saturation:-6, warmth:8,  highlights:-6,  shadows:10,  hue:0,   clarity:-6, sharpen:2,  vignette:0,  grain:0,  vibrance:0},
+    // Neutral (NT) — flat for grading
+    "NT Neutral"   :{brightness:0,  contrast:-10,saturation:-18,warmth:0,  highlights:0,   shadows:0,   hue:0,   clarity:-8, sharpen:0,  vignette:0,  grain:0,  vibrance:-8},
+    // Vivid (VV) — boosted saturation, punchy
+    "VV Vivid"     :{brightness:0,  contrast:16, saturation:34, warmth:3,  highlights:4,   shadows:-4,  hue:0,   clarity:10, sharpen:9,  vignette:0,  grain:0,  vibrance:18},
+    // Vivid 2 (VV2) — more extreme vivid
+    "VV2 Vivid 2"  :{brightness:3,  contrast:20, saturation:40, warmth:0,  highlights:6,   shadows:-4,  hue:0,   clarity:18, sharpen:12, vignette:0,  grain:0,  vibrance:22},
+    // Film (FL) — cinema look, cool tones
+    "FL Film"      :{brightness:-4, contrast:22, saturation:-12,warmth:-6, highlights:-12, shadows:-6,  hue:-8,  clarity:12, sharpen:7,  vignette:12, grain:5,  vibrance:6},
+    // Instant (IN) — faded instant film look
+    "IN Instant"   :{brightness:6,  contrast:-18,saturation:-22,warmth:10, highlights:-12, shadows:18,  hue:0,   clarity:-10,sharpen:0,  vignette:10, grain:8,  vibrance:-12},
+    // Soft High (SH) — high key soft
+    "SH Soft High" :{brightness:18, contrast:-12,saturation:6,  warmth:6,  highlights:-18, shadows:22,  hue:0,   clarity:-8, sharpen:2,  vignette:0,  grain:0,  vibrance:6},
+    // Mono (BW) — Sony B&W
+    "BW Mono"      :{brightness:0,  contrast:14, saturation:-100,warmth:0, highlights:0,   shadows:0,   hue:0,   clarity:10, sharpen:7,  vignette:0,  grain:4,  vibrance:0},
+    // Sepia (SE) — warm tone monochrome
+    "SE Sepia"     :{brightness:0,  contrast:8,  saturation:-80,warmth:40, highlights:0,   shadows:0,   hue:18,  clarity:5,  sharpen:4,  vignette:6,  grain:4,  vibrance:-25},
+  },
+  "VSCO":{
+    // VSCO Film-inspired presets — characteristic fade, grain, color shifts
+    "A1"  :{brightness:8,  contrast:-6,  saturation:-16,warmth:22, highlights:-10, shadows:16,  hue:0,   clarity:-3, sharpen:0, vignette:12, grain:7,  vibrance:-2},
+    "A2"  :{brightness:10, contrast:-9,  saturation:-22,warmth:26, highlights:-14, shadows:20,  hue:0,   clarity:-5, sharpen:0, vignette:16, grain:9,  vibrance:-3},
+    "A4"  :{brightness:6,  contrast:-5,  saturation:-12,warmth:18, highlights:-7,  shadows:13,  hue:0,   clarity:-3, sharpen:0, vignette:10, grain:6,  vibrance:-2},
+    "A6"  :{brightness:12, contrast:-11, saturation:-26,warmth:30, highlights:-16, shadows:24,  hue:0,   clarity:-7, sharpen:0, vignette:18, grain:11, vibrance:-4},
+    "B1"  :{brightness:5,  contrast:0,   saturation:-38,warmth:0,  highlights:-6,  shadows:10,  hue:0,   clarity:-6, sharpen:0, vignette:20, grain:12, vibrance:-12},
+    "B5"  :{brightness:3,  contrast:2,   saturation:-30,warmth:-4, highlights:-4,  shadows:8,   hue:0,   clarity:-4, sharpen:0, vignette:16, grain:9,  vibrance:-10},
+    "C1"  :{brightness:3,  contrast:9,   saturation:-16,warmth:-12,highlights:0,   shadows:5,   hue:0,   clarity:5,  sharpen:5, vignette:10, grain:6,  vibrance:0},
+    "C8"  :{brightness:0,  contrast:13,  saturation:-22,warmth:-18,highlights:0,   shadows:5,   hue:-6,  clarity:7,  sharpen:5, vignette:12, grain:7,  vibrance:0},
+    "E8"  :{brightness:6,  contrast:-3,  saturation:-14,warmth:24, highlights:-11, shadows:15,  hue:0,   clarity:-4, sharpen:0, vignette:16, grain:9,  vibrance:-4},
+    "F1"  :{brightness:9,  contrast:-4,  saturation:-20,warmth:16, highlights:-9,  shadows:13,  hue:0,   clarity:-4, sharpen:0, vignette:12, grain:8,  vibrance:-2},
+    "G3"  :{brightness:8,  contrast:5,   saturation:-12,warmth:5,  highlights:-5,  shadows:8,   hue:8,   clarity:3,  sharpen:2, vignette:10, grain:6,  vibrance:5},
+    "HB1" :{brightness:12, contrast:-13, saturation:-32,warmth:32, highlights:-22, shadows:26,  hue:0,   clarity:-9, sharpen:0, vignette:22, grain:13, vibrance:-4},
+    "HB2" :{brightness:14, contrast:-15, saturation:-38,warmth:34, highlights:-24, shadows:30,  hue:0,   clarity:-10,sharpen:0, vignette:24, grain:15, vibrance:-6},
+    "M2"  :{brightness:15, contrast:-16, saturation:-36,warmth:36, highlights:-26, shadows:32,  hue:0,   clarity:-11,sharpen:0, vignette:24, grain:16, vibrance:-6},
+    "M5"  :{brightness:10, contrast:-11, saturation:-28,warmth:26, highlights:-20, shadows:24,  hue:0,   clarity:-8, sharpen:0, vignette:20, grain:12, vibrance:-4},
+    "P5"  :{brightness:12, contrast:-11, saturation:-24,warmth:20, highlights:-16, shadows:22,  hue:0,   clarity:-7, sharpen:0, vignette:14, grain:10, vibrance:-6},
+    "S2"  :{brightness:-3, contrast:13,  saturation:6,  warmth:-6, highlights:3,   shadows:-5,  hue:-10, clarity:11, sharpen:8, vignette:12, grain:7,  vibrance:6},
+    "T1"  :{brightness:0,  contrast:11,  saturation:22, warmth:-10,highlights:5,   shadows:-5,  hue:-6,  clarity:8,  sharpen:6, vignette:8,  grain:5,  vibrance:11},
+    "X1"  :{brightness:5,  contrast:5,   saturation:-9, warmth:12, highlights:-5,  shadows:9,   hue:0,   clarity:2,  sharpen:2, vignette:10, grain:7,  vibrance:2},
+  },
+  "Google Foto":{
+    // Inspired by Google Photos built-in filters
+    "West"     :{brightness:5,  contrast:-4,  saturation:-10,warmth:20, highlights:-6,  shadows:12,  hue:0,   clarity:-4, sharpen:2,  vignette:8,  grain:3,  vibrance:0},
+    "Vogue"    :{brightness:12, contrast:-9,  saturation:-6, warmth:5,  highlights:-12, shadows:16,  hue:-5,  clarity:-5, sharpen:0,  vignette:0,  grain:0,  vibrance:0},
+    "Eastside" :{brightness:-3, contrast:11,  saturation:6,  warmth:16, highlights:5,   shadows:-9,  hue:5,   clarity:5,  sharpen:4,  vignette:10, grain:2,  vibrance:5},
+    "Honey"    :{brightness:10, contrast:0,   saturation:9,  warmth:28, highlights:0,   shadows:8,   hue:0,   clarity:0,  sharpen:0,  vignette:0,  grain:0,  vibrance:5},
+    "Palma"    :{brightness:3,  contrast:0,   saturation:-14,warmth:-18,highlights:0,   shadows:5,   hue:-10, clarity:0,  sharpen:2,  vignette:0,  grain:0,  vibrance:0},
+    "Metro"    :{brightness:-3, contrast:20,  saturation:-18,warmth:-6, highlights:-6,  shadows:-10, hue:0,   clarity:14, sharpen:9,  vignette:14, grain:5,  vibrance:0},
+    "Modena"   :{brightness:2,  contrast:11,  saturation:18, warmth:18, highlights:5,   shadows:0,   hue:5,   clarity:6,  sharpen:4,  vignette:8,  grain:4,  vibrance:9},
+    "Bazaar"   :{brightness:8,  contrast:-13, saturation:-22,warmth:12, highlights:-16, shadows:20,  hue:0,   clarity:-7, sharpen:0,  vignette:10, grain:7,  vibrance:-9},
+    "Eiffel"   :{brightness:2,  contrast:5,   saturation:-100,warmth:0, highlights:0,   shadows:5,   hue:0,   clarity:3,  sharpen:3,  vignette:5,  grain:3,  vibrance:0},
+    "Cooper"   :{brightness:0,  contrast:13,  saturation:6,  warmth:24, highlights:5,   shadows:-3,  hue:8,   clarity:7,  sharpen:5,  vignette:6,  grain:3,  vibrance:6},
+    "Vesper"   :{brightness:-10,contrast:16,  saturation:-12,warmth:-10,highlights:-16, shadows:-12, hue:0,   clarity:9,  sharpen:6,  vignette:22, grain:6,  vibrance:0},
+    "Stark"    :{brightness:-3, contrast:28,  saturation:-100,warmth:0, highlights:-9,  shadows:-12, hue:0,   clarity:18, sharpen:10, vignette:12, grain:5,  vibrance:0},
+    "Noir"     :{brightness:-9, contrast:32,  saturation:-100,warmth:0, highlights:-16, shadows:-16, hue:0,   clarity:20, sharpen:12, vignette:28, grain:7,  vibrance:0},
+    "Playa"    :{brightness:6,  contrast:3,   saturation:6,  warmth:20, highlights:-5,  shadows:10,  hue:0,   clarity:0,  sharpen:2,  vignette:0,  grain:0,  vibrance:3},
+  },
+  "Photoshop":{
+    // Classic Photoshop-style grading looks
+    "Matte"        :{brightness:6,  contrast:-16, saturation:-16,warmth:5,  highlights:-22, shadows:22,  hue:0,   clarity:-9, sharpen:0,  vignette:10, grain:6,  vibrance:-6},
+    "Faded Glory"  :{brightness:16, contrast:-22, saturation:-32,warmth:18, highlights:-28, shadows:28,  hue:0,   clarity:-12,sharpen:0,  vignette:16, grain:12, vibrance:-12},
+    "Cross Process":{brightness:3,  contrast:28,  saturation:32, warmth:-12,highlights:12,  shadows:-18, hue:18,  clarity:14, sharpen:9,  vignette:12, grain:7,  vibrance:16},
+    "Cinematic"    :{brightness:-6, contrast:22,  saturation:-12,warmth:-6, highlights:-18, shadows:6,   hue:0,   clarity:12, sharpen:7,  vignette:28, grain:5,  vibrance:0},
+    "Bleach Bypass":{brightness:-6, contrast:38,  saturation:-65,warmth:0,  highlights:18,  shadows:-18, hue:0,   clarity:18, sharpen:12, vignette:22, grain:9,  vibrance:0},
+    "Velvet"       :{brightness:8,  contrast:-11, saturation:-6, warmth:14, highlights:-12, shadows:14,  hue:0,   clarity:-6, sharpen:0,  vignette:16, grain:7,  vibrance:5},
+    "Cyanotype"    :{brightness:0,  contrast:10,  saturation:-82,warmth:-44,highlights:5,   shadows:-5,  hue:-120,clarity:9,  sharpen:6,  vignette:12, grain:4,  vibrance:-22},
+    "HDR Realism"  :{brightness:0,  contrast:28,  saturation:22, warmth:3,  highlights:-22, shadows:22,  hue:0,   clarity:28, sharpen:14, vignette:8,  grain:2,  vibrance:12},
+    "Duotone Warm" :{brightness:5,  contrast:16,  saturation:-52,warmth:38, highlights:5,   shadows:-5,  hue:16,  clarity:5,  sharpen:4,  vignette:10, grain:6,  vibrance:-16},
+    "Duotone Cool" :{brightness:2,  contrast:16,  saturation:-52,warmth:-34,highlights:5,   shadows:-5,  hue:-22, clarity:5,  sharpen:4,  vignette:10, grain:6,  vibrance:-16},
+    "Punch"        :{brightness:0,  contrast:24,  saturation:28, warmth:5,  highlights:5,   shadows:-5,  hue:0,   clarity:20, sharpen:12, vignette:12, grain:2,  vibrance:14},
+    "Soft Glow"    :{brightness:12, contrast:-9,  saturation:-6, warmth:9,  highlights:-10, shadows:12,  hue:0,   clarity:-8, sharpen:0,  vignette:8,  grain:4,  vibrance:6},
+    "Golden Split" :{brightness:4,  contrast:11,  saturation:-22,warmth:28, highlights:18,  shadows:-12, hue:10,  clarity:6,  sharpen:3,  vignette:12, grain:5,  vibrance:-6},
+    "Faded Teal"   :{brightness:9,  contrast:-6,  saturation:-22,warmth:-18,highlights:-16, shadows:22,  hue:-16, clarity:-6, sharpen:0,  vignette:14, grain:9,  vibrance:-10},
+    "Orange Crush" :{brightness:3,  contrast:16,  saturation:12, warmth:24, highlights:9,   shadows:-6,  hue:5,   clarity:11, sharpen:6,  vignette:10, grain:4,  vibrance:12},
+  },
+  "B&W Pro":{
+    // Professional black & white film and darkroom styles
+    "Ilford HP5"   :{brightness:0,  contrast:11, saturation:-100,warmth:0,  highlights:5,   shadows:-5,  hue:0,   clarity:11, sharpen:9,  vignette:15, grain:14, vibrance:0},
+    "Tri-X 400"    :{brightness:-3, contrast:22, saturation:-100,warmth:0,  highlights:9,   shadows:-9,  hue:0,   clarity:15, sharpen:11, vignette:22, grain:20, vibrance:0},
+    "T-Max 100"    :{brightness:0,  contrast:18, saturation:-100,warmth:0,  highlights:5,   shadows:-5,  hue:0,   clarity:12, sharpen:10, vignette:10, grain:4,  vibrance:0},
+    "Acros II"     :{brightness:-2, contrast:20, saturation:-100,warmth:0,  highlights:6,   shadows:-8,  hue:0,   clarity:14, sharpen:10, vignette:14, grain:8,  vibrance:0},
+    "High Key"     :{brightness:22, contrast:-6, saturation:-100,warmth:0,  highlights:22,  shadows:22,  hue:0,   clarity:0,  sharpen:2,  vignette:0,  grain:2,  vibrance:0},
+    "Low Key"      :{brightness:-20,contrast:30, saturation:-100,warmth:0,  highlights:-22, shadows:-18, hue:0,   clarity:18, sharpen:12, vignette:34, grain:9,  vibrance:0},
+    "Selenium"     :{brightness:0,  contrast:11, saturation:-88, warmth:-12,highlights:5,   shadows:-5,  hue:-160,clarity:9,  sharpen:7,  vignette:16, grain:9,  vibrance:0},
+    "Platinum"     :{brightness:5,  contrast:6,  saturation:-100,warmth:5,  highlights:-5,  shadows:8,   hue:0,   clarity:6,  sharpen:4,  vignette:10, grain:6,  vibrance:0},
+    "Monochrome"   :{brightness:0,  contrast:9,  saturation:-100,warmth:0,  highlights:0,   shadows:0,   hue:0,   clarity:9,  sharpen:7,  vignette:10, grain:6,  vibrance:0},
+    "Gritty Street":{brightness:-5, contrast:28, saturation:-100,warmth:0,  highlights:10,  shadows:-12, hue:0,   clarity:20, sharpen:12, vignette:28, grain:22, vibrance:0},
+    "Soft Matte"   :{brightness:6,  contrast:-4, saturation:-100,warmth:0,  highlights:-8,  shadows:12,  hue:0,   clarity:-5, sharpen:0,  vignette:8,  grain:4,  vibrance:0},
+    "Infrared"     :{brightness:10, contrast:16, saturation:-100,warmth:0,  highlights:20,  shadows:5,   hue:0,   clarity:12, sharpen:8,  vignette:10, grain:8,  vibrance:0},
+  },
+  "Nature":{
+    // Optimized for landscapes, nature, outdoor photography
+    "Golden Hour"  :{brightness:8,  contrast:10, saturation:18, warmth:32, highlights:12,  shadows:5,   hue:5,   clarity:8,  sharpen:6,  vignette:10, grain:3,  vibrance:12},
+    "Blue Hour"    :{brightness:-5, contrast:14, saturation:22, warmth:-25,highlights:-5,  shadows:6,   hue:-15, clarity:10, sharpen:6,  vignette:16, grain:4,  vibrance:10},
+    "Forest"       :{brightness:-3, contrast:12, saturation:30, warmth:8,  highlights:-8,  shadows:6,   hue:-8,  clarity:12, sharpen:7,  vignette:18, grain:4,  vibrance:14},
+    "Ocean"        :{brightness:5,  contrast:8,  saturation:25, warmth:-18,highlights:5,   shadows:5,   hue:-10, clarity:8,  sharpen:5,  vignette:8,  grain:2,  vibrance:12},
+    "Mountain"     :{brightness:3,  contrast:16, saturation:18, warmth:-10,highlights:5,   shadows:-5,  hue:-5,  clarity:16, sharpen:9,  vignette:14, grain:5,  vibrance:8},
+    "Desert"       :{brightness:8,  contrast:12, saturation:16, warmth:28, highlights:10,  shadows:-5,  hue:8,   clarity:14, sharpen:7,  vignette:10, grain:6,  vibrance:8},
+    "Autumn"       :{brightness:5,  contrast:14, saturation:28, warmth:25, highlights:5,   shadows:0,   hue:8,   clarity:10, sharpen:6,  vignette:12, grain:4,  vibrance:14},
+    "Spring Fresh" :{brightness:8,  contrast:6,  saturation:22, warmth:6,  highlights:-3,  shadows:8,   hue:-5,  clarity:6,  sharpen:4,  vignette:6,  grain:2,  vibrance:12},
+    "Fog & Mist"   :{brightness:10, contrast:-8, saturation:-18,warmth:5,  highlights:-10, shadows:18,  hue:0,   clarity:-6, sharpen:2,  vignette:14, grain:6,  vibrance:-6},
+    "Sunset Drama" :{brightness:0,  contrast:18, saturation:28, warmth:36, highlights:-10, shadows:8,   hue:8,   clarity:12, sharpen:5,  vignette:22, grain:5,  vibrance:14},
+    "Macro Green"  :{brightness:3,  contrast:8,  saturation:36, warmth:3,  highlights:-5,  shadows:5,   hue:-12, clarity:14, sharpen:10, vignette:12, grain:2,  vibrance:16},
+    "Overcast"     :{brightness:2,  contrast:-5, saturation:-12,warmth:-5, highlights:-5,  shadows:10,  hue:0,   clarity:4,  sharpen:3,  vignette:8,  grain:3,  vibrance:-4},
+  },
+  "Sepia":{
+    // Warm toned, aged, and vintage toning styles
+    "Classic Sepia":{brightness:2,  contrast:8,  saturation:-78,warmth:40, highlights:0,   shadows:0,   hue:18,  clarity:3,  sharpen:3,  vignette:12, grain:8,  vibrance:-20},
+    "Dark Sepia"   :{brightness:-6, contrast:16, saturation:-82,warmth:44, highlights:-8,  shadows:-5,  hue:20,  clarity:8,  sharpen:5,  vignette:22, grain:10, vibrance:-22},
+    "Warm Antique" :{brightness:6,  contrast:4,  saturation:-70,warmth:50, highlights:-5,  shadows:8,   hue:15,  clarity:-3, sharpen:2,  vignette:18, grain:14, vibrance:-18},
+    "Coffee Tone"  :{brightness:3,  contrast:10, saturation:-72,warmth:35, highlights:5,   shadows:3,   hue:22,  clarity:4,  sharpen:3,  vignette:14, grain:9,  vibrance:-18},
+    "Daguerreotype":{brightness:-4, contrast:20, saturation:-90,warmth:30, highlights:8,   shadows:-12, hue:10,  clarity:10, sharpen:6,  vignette:28, grain:18, vibrance:-24},
+    "Faded Amber"  :{brightness:12, contrast:-5, saturation:-60,warmth:30, highlights:-10, shadows:14,  hue:12,  clarity:-4, sharpen:0,  vignette:16, grain:12, vibrance:-14},
+    "Bronze"       :{brightness:0,  contrast:12, saturation:-65,warmth:32, highlights:3,   shadows:0,   hue:14,  clarity:6,  sharpen:4,  vignette:10, grain:7,  vibrance:-16},
+    "Warm Split"   :{brightness:4,  contrast:8,  saturation:-55,warmth:25, highlights:10,  shadows:-8,  hue:10,  clarity:5,  sharpen:3,  vignette:8,  grain:6,  vibrance:-12},
+    "Aged Photo"   :{brightness:8,  contrast:-2, saturation:-75,warmth:45, highlights:-12, shadows:12,  hue:20,  clarity:-5, sharpen:0,  vignette:24, grain:20, vibrance:-20},
+    "Red Sepia"    :{brightness:2,  contrast:12, saturation:-60,warmth:30, highlights:5,   shadows:0,   hue:8,   clarity:5,  sharpen:4,  vignette:12, grain:8,  vibrance:-15},
+  },
+  "Retro":{
+    "Vintage"   :{brightness:5,  contrast:-2,  saturation:-28,warmth:28, highlights:-16, shadows:16,  hue:0,   clarity:-6, sharpen:0,  vignette:26, grain:20, vibrance:0},
+    "Fade Film" :{brightness:13, contrast:-13, saturation:-38,warmth:22, highlights:-22, shadows:22,  hue:0,   clarity:-9, sharpen:0,  vignette:22, grain:16, vibrance:0},
+    "Polaroid"  :{brightness:10, contrast:-11, saturation:-6, warmth:20, highlights:-6,  shadows:16,  hue:0,   clarity:-4, sharpen:0,  vignette:22, grain:12, vibrance:0},
+    "90s Film"  :{brightness:3,  contrast:16,  saturation:12, warmth:8,  highlights:5,   shadows:-5,  hue:-3,  clarity:5,  sharpen:8,  vignette:16, grain:12, vibrance:0},
+    "Disposable":{brightness:8,  contrast:13,  saturation:6,  warmth:16, highlights:10,  shadows:0,   hue:2,   clarity:0,  sharpen:0,  vignette:14, grain:24, vibrance:0},
+    "Lomo"      :{brightness:-5, contrast:28,  saturation:32, warmth:-5, highlights:5,   shadows:-10, hue:0,   clarity:12, sharpen:9,  vignette:34, grain:16, vibrance:0},
+  },
+  "Sinema":{
+    "Moody"       :{brightness:-9, contrast:22,  saturation:-18,warmth:-12,highlights:-22, shadows:16,  hue:0,   clarity:12, sharpen:6,  vignette:28, grain:9,  vibrance:0},
+    "Teal Orange" :{brightness:0,  contrast:16,  saturation:20, warmth:14, highlights:9,   shadows:-10, hue:0,   clarity:9,  sharpen:7,  vignette:16, grain:5,  vibrance:9},
+    "Neo Noir"    :{brightness:-13,contrast:32,  saturation:-74,warmth:-18,highlights:-12, shadows:-12, hue:0,   clarity:17, sharpen:11, vignette:38, grain:14, vibrance:0},
+    "Summer Haze" :{brightness:13, contrast:-6,  saturation:-14,warmth:34, highlights:-6,  shadows:22,  hue:0,   clarity:-6, sharpen:0,  vignette:9,  grain:7,  vibrance:0},
+    "Indie"       :{brightness:-4, contrast:5,   saturation:-24,warmth:18, highlights:-16, shadows:16,  hue:0,   clarity:7,  sharpen:2,  vignette:22, grain:12, vibrance:0},
+  },
+  "Portrait":{
+    "Skin Glow"  :{brightness:9,  contrast:-6,  saturation:-6, warmth:14, highlights:-9,  shadows:13,  hue:0,  clarity:-6, sharpen:2,  vignette:10, grain:5,  vibrance:0},
+    "Beauty"     :{brightness:13, contrast:-9,  saturation:-12,warmth:12, highlights:-14, shadows:16,  hue:0,  clarity:-9, sharpen:0,  vignette:8,  grain:2,  vibrance:0},
+    "Golden Hour":{brightness:8,  contrast:9,   saturation:14, warmth:30, highlights:10,  shadows:5,   hue:-5, clarity:5,  sharpen:4,  vignette:14, grain:6,  vibrance:0},
+    "Pastel"     :{brightness:11, contrast:-11, saturation:-28,warmth:20, highlights:-11, shadows:20,  hue:0,  clarity:-7, sharpen:0,  vignette:12, grain:7,  vibrance:0},
+    "Editorial"  :{brightness:-5, contrast:20,  saturation:-14,warmth:-6, highlights:-6,  shadows:6,   hue:0,  clarity:12, sharpen:8,  vignette:18, grain:6,  vibrance:0},
+  },
+};
+
+const GRADS=[
+  'linear-gradient(135deg,#FF6B6B,#FFE66D)',
+  'linear-gradient(135deg,#A8EDEA,#FED6E3)',
+  'linear-gradient(135deg,#667eea,#764ba2)',
+  'linear-gradient(135deg,#FFB88C,#A29BFE)',
+  'linear-gradient(135deg,#FDA7DF,#F761A1)',
+  'linear-gradient(135deg,#1E3C72,#2A5298)',
+  'linear-gradient(135deg,#F093FB,#F5576C)',
+  'linear-gradient(135deg,#FF9A56,#FF6A88)',
+  'linear-gradient(135deg,#43C6AC,#F8FFAE)',
+  'linear-gradient(135deg,#4facfe,#00f2fe)',
+];
+
+/* ─────────────────────────────────────────────────
+   STATE
+───────────────────────────────────────────────── */
+let img=null, canvas, ctx;
+const MAX_PREVIEW=1200;
+let sliders={brightness:0,contrast:0,saturation:0,warmth:0,highlights:0,shadows:0,hue:0,clarity:0,sharpen:0,vignette:0,grain:0,vibrance:0};
+let starRating=0;
+
+/* ─────────────────────────────────────────────────
+   VISITOR
+───────────────────────────────────────────────── */
+(function(){
+  try{
+    const k='sp_v_'+new Date().toDateString();
+    localStorage.setItem(k,(parseInt(localStorage.getItem(k)||'0')+1).toString());
+    let tot=0;
+    for(let i=0;i<30;i++){const d=new Date();d.setDate(d.getDate()-i);tot+=parseInt(localStorage.getItem('sp_v_'+d.toDateString())||'0');}
+    const el=document.getElementById('visitorCount');
+    if(el)el.textContent=tot+' pengunjung';
+  }catch(e){}
+})();
+
+/* ─────────────────────────────────────────────────
+   THEME
+───────────────────────────────────────────────── */
+const themeBtn=document.getElementById('themeBtn');
+let curTheme=localStorage.getItem('sp-theme')||'dark';
+document.documentElement.setAttribute('data-theme',curTheme);
+themeBtn.textContent=curTheme==='dark'?'☀️':'🌙';
+
+themeBtn.addEventListener('click',()=>{
+  curTheme=curTheme==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',curTheme);
+  localStorage.setItem('sp-theme',curTheme);
+  themeBtn.textContent=curTheme==='dark'?'☀️':'🌙';
+});
+
+/* ─────────────────────────────────────────────────
+   PANEL TABS
+───────────────────────────────────────────────── */
+document.querySelectorAll('.ptab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    const pane=t.dataset.pane;
+    document.querySelectorAll('.ptab').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.pane').forEach(x=>x.classList.remove('on'));
+    t.classList.add('on');
+    const p=document.getElementById('pane-'+pane);
+    if(p)p.classList.add('on');
+  });
+});
+
+/* toolbar → panel tab sync */
+document.getElementById('tbAdjust').addEventListener('click',()=>switchPanel('adjust','tbAdjust'));
+document.getElementById('tbFilters').addEventListener('click',()=>switchPanel('filters','tbFilters'));
+document.getElementById('tbDownload').addEventListener('click',()=>switchPanel('download','tbDownload'));
+
+function switchPanel(pane,btnId){
+  document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(btnId).classList.add('active');
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  document.querySelector(`.ptab[data-pane="${pane}"]`).classList.add('on');
+  document.getElementById('pane-'+pane).classList.add('on');
+}
+
+document.getElementById('tbUpload').addEventListener('click',()=>{
+  document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tbUpload').classList.add('active');
+  document.getElementById('fileInput').click();
+});
+
+/* ─────────────────────────────────────────────────
+   CANVAS
+───────────────────────────────────────────────── */
+function initCanvas(){
+  canvas=document.getElementById('preview');
+  if(canvas)ctx=canvas.getContext('2d',{willReadFrequently:true});
+}
+
+/* ─────────────────────────────────────────────────
+   PRESETS
+───────────────────────────────────────────────── */
+function initPresets(){
+  const tabs=document.getElementById('catTabs');
+  Object.keys(PRESETS).forEach((cat,i)=>{
+    const b=document.createElement('button');
+    b.className='ctab'+(i===0?' on':'');
+    b.textContent=cat;b.type='button';
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('.ctab').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      loadCat(cat);
+    });
+    tabs.appendChild(b);
+  });
+  loadCat('Kodak');
+}
+
+function loadCat(cat){
+  const grid=document.getElementById('presetGrid');
+  grid.innerHTML='';
+  Object.entries(PRESETS[cat]).forEach(([name,vals],i)=>{
+    const d=document.createElement('div');
+    d.className='pi';
+    d.innerHTML=`<div class="pi-bg" style="background:${GRADS[i%GRADS.length]}"></div><div class="pi-name">${name}</div><div class="pi-check">✓</div>`;
+    d.addEventListener('click',()=>applyPreset(vals,name,d));
+    grid.appendChild(d);
+  });
+}
+
+function applyPreset(vals,name,el){
+  /* Clamp each value to its slider's actual min/max */
+  const LIMITS={
+    brightness:[-60,60], contrast:[-50,80], saturation:[-100,100],
+    warmth:[-50,50], highlights:[-50,50], shadows:[-30,50],
+    hue:[-180,180], clarity:[-20,30], sharpen:[0,20],
+    vignette:[0,60], grain:[0,30], vibrance:[-50,50]
+  };
+  Object.keys(vals).forEach(k=>{
+    const lim=LIMITS[k];
+    sliders[k]=lim?Math.max(lim[0],Math.min(lim[1],vals[k])):vals[k];
+  });
+  syncSlidersUI();draw();
+  toast('✨ '+name);
+  document.querySelectorAll('.pi').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function syncSlidersUI(){
+  Object.keys(sliders).forEach(k=>{
+    const el=document.getElementById(k),vEl=document.getElementById('val-'+k);
+    if(el)el.value=sliders[k];
+    if(vEl)vEl.textContent=sliders[k];
+  });
+}
+
+/* ─────────────────────────────────────────────────
+   IMAGE LOAD
+───────────────────────────────────────────────── */
+function loadImage(file){
+  if(!file)return;
+  if(!file.type?.startsWith('image/')){toast(curLang==='id'?'⚠️ Bukan file gambar':'⚠️ Not an image file');return;}
+  if(file.size>20*1024*1024){toast(curLang==='id'?'⚠️ File terlalu besar (maks 20MB)':'⚠️ File too large (max 20MB)');return;}
+  initCanvas();
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const image=new Image();
+    image.onload=()=>{
+      img=image;
+      // Fit canvas to the canvas-area container, preserving aspect ratio
+      const area=document.getElementById('canvasArea');
+      const aW=area.clientWidth||800;
+      const aH=area.clientHeight||600;
+      const scale=Math.min(1,MAX_PREVIEW/Math.max(image.naturalWidth,image.naturalHeight),aW/image.naturalWidth,(aH-20)/image.naturalHeight);
+      canvas.width=Math.round(image.naturalWidth*scale);
+      canvas.height=Math.round(image.naturalHeight*scale);
+      ctx.drawImage(image,0,0,canvas.width,canvas.height);
+      document.getElementById('dropOverlay').style.display='none';
+      canvas.style.display='block';
+      document.getElementById('imgInfo').textContent=`${image.naturalWidth}×${image.naturalHeight}px · ${(file.size/1024).toFixed(0)} KB`;
+      const origLbl=document.getElementById('origSizeLabel');
+      if(origLbl)origLbl.textContent=`${image.naturalWidth} x ${image.naturalHeight} px`;
+      draw();
+      toast(curLang==='id'?'✅ Foto dimuat':'✅ Photo loaded');
+    };
+    image.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ─────────────────────────────────────────────────
+   PIXEL ENGINE
+───────────────────────────────────────────────── */
+function clamp(v){return v<0?0:v>255?255:v;}
+
+function rgbToHsl(r,g,b){
+  r/=255;g/=255;b/=255;
+  const max=Math.max(r,g,b),min=Math.min(r,g,b),d=max-min;
+  let h=0,s=0;const l=(max+min)/2;
+  if(d){s=l>.5?d/(2-max-min):d/(max+min);if(max===r)h=((g-b)/d+(g<b?6:0))/6;else if(max===g)h=((b-r)/d+2)/6;else h=((r-g)/d+4)/6;}
+  return[h,s,l];
+}
+function hslToRgb(h,s,l){
+  if(!s){const v=l*255;return[v,v,v];}
+  const q=l<.5?l*(1+s):l+s-l*s,p=2*l-q;
+  const f=(p,q,t)=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<.5)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;};
+  return[f(p,q,h+1/3)*255,f(p,q,h)*255,f(p,q,h-1/3)*255];
+}
+function rng32(seed){return()=>{seed=(seed+0x6D2B79F5)|0;let t=Math.imul(seed^(seed>>>15),1|seed);t=t+Math.imul(t^(t>>>7),61|t)^t;return((t^(t>>>14))>>>0)/4294967296;};}
+function boxBlur(src,w,h,r){const tmp=new Uint8ClampedArray(src.length),out=new Uint8ClampedArray(src.length);for(let y=0;y<h;y++){for(let c=0;c<3;c++){let sum=0,cnt=0;for(let x=-r;x<=r;x++){const nx=Math.max(0,Math.min(w-1,x));sum+=src[(y*w+nx)*4+c];cnt++;}tmp[(y*w)*4+c]=sum/cnt;for(let x=1;x<w;x++){const add=Math.min(x+r,w-1),rem=x-r-1;if(rem>=0){sum-=src[(y*w+rem)*4+c];cnt--;}sum+=src[(y*w+add)*4+c];cnt++;tmp[(y*w+x)*4+c]=sum/cnt;}}for(let x=0;x<w;x++)tmp[(y*w+x)*4+3]=src[(y*w+x)*4+3];}for(let x=0;x<w;x++){for(let c=0;c<3;c++){let sum=0,cnt=0;for(let y=-r;y<=r;y++){const ny=Math.max(0,Math.min(h-1,y));sum+=tmp[(ny*w+x)*4+c];cnt++;}out[(0*w+x)*4+c]=sum/cnt;for(let y=1;y<h;y++){const add=Math.min(y+r,h-1),rem=y-r-1;if(rem>=0){sum-=tmp[(rem*w+x)*4+c];cnt--;}sum+=tmp[(add*w+x)*4+c];cnt++;out[(y*w+x)*4+c]=sum/cnt;}}for(let y=0;y<h;y++)out[(y*w+x)*4+3]=tmp[(y*w+x)*4+3];}return out;}
+
+function renderFx(ctx,w,h,srcImg,s){
+  ctx.clearRect(0,0,w,h);ctx.drawImage(srcImg,0,0,w,h);
+  const id=ctx.getImageData(0,0,w,h),data=id.data;
+  const rn=s.grain>0?rng32(0xDEADBEEF):null;
+
+  for(let i=0;i<data.length;i+=4){
+    let r=data[i],g=data[i+1],b=data[i+2];
+
+    /* 1. Brightness */
+    if(s.brightness){r+=s.brightness;g+=s.brightness;b+=s.brightness;}
+
+    /* 2. Contrast */
+    if(s.contrast){const cf=1+s.contrast/100;r=(r-128)*cf+128;g=(g-128)*cf+128;b=(b-128)*cf+128;}
+    r=clamp(r);g=clamp(g);b=clamp(b);
+
+    /* 3. Warmth (temperature) — shift red/blue, tiny green */
+    if(s.warmth){r=clamp(r+s.warmth*1.4);g=clamp(g+s.warmth*0.3);b=clamp(b-s.warmth*1.2);}
+
+    /* 4. Saturation — use luminance, scale all channels equally */
+    if(s.saturation){
+      const lum=0.2126*r+0.7152*g+0.0722*b;
+      const sf=1+s.saturation/100;
+      r=clamp(lum+(r-lum)*sf);
+      g=clamp(lum+(g-lum)*sf);
+      b=clamp(lum+(b-lum)*sf);
+    }
+
+    /* 5. Vibrance — boost less-saturated colors more */
+    if(s.vibrance){
+      const mx=Math.max(r,g,b),mn=Math.min(r,g,b);
+      const sat=(mx===0)?0:(mx-mn)/mx;
+      const vf=1+(s.vibrance/100)*(1-sat);
+      const lv=0.2126*r+0.7152*g+0.0722*b;
+      r=clamp(lv+(r-lv)*vf);
+      g=clamp(lv+(g-lv)*vf);
+      b=clamp(lv+(b-lv)*vf);
+    }
+
+    /* 6. Hue rotation via HSL */
+    if(s.hue){
+      const hsl=rgbToHsl(r,g,b);
+      let hh=hsl[0]+s.hue/360;
+      if(hh<0)hh+=1;if(hh>1)hh-=1;
+      const rgb=hslToRgb(hh,hsl[1],hsl[2]);
+      r=clamp(rgb[0]);g=clamp(rgb[1]);b=clamp(rgb[2]);
+    }
+
+    /* 7. Highlights & Shadows using luminance mask */
+    const lum2=0.2126*r+0.7152*g+0.0722*b;
+    if(s.highlights){
+      /* highlights mask: smooth ramp from midtone(128)=0 → white(255)=1 */
+      const t=Math.max(0,(lum2-100)/155);
+      const mask=t*t*(3-2*t); /* smoothstep */
+      const adj=s.highlights*mask;
+      r=clamp(r+adj);g=clamp(g+adj);b=clamp(b+adj);
+    }
+    if(s.shadows){
+      /* shadows mask: smooth ramp from midtone(128)=0 → black(0)=1 */
+      const t=Math.max(0,(155-lum2)/155);
+      const mask=t*t*(3-2*t); /* smoothstep */
+      const adj=s.shadows*mask;
+      r=clamp(r+adj);g=clamp(g+adj);b=clamp(b+adj);
+    }
+
+    /* 8. Clarity — micro-contrast: push mid-tones away from the pixel's own grey */
+    if(s.clarity){
+      const avg=(r+g+b)/3;
+      /* sign-based boost: pixels above avg pushed up, below pushed down */
+      const dev=s.clarity/100;
+      r=clamp(r+(r-avg)*dev*1.5);
+      g=clamp(g+(g-avg)*dev*1.5);
+      b=clamp(b+(b-avg)*dev*1.5);
+    }
+
+    /* 9. Grain */
+    if(rn){const n=(rn()-0.5)*s.grain*2.5;r=clamp(r+n);g=clamp(g+n);b=clamp(b+n);}
+
+    data[i]=r;data[i+1]=g;data[i+2]=b;
+  }
+  ctx.putImageData(id,0,0);
+
+  /* 10. Sharpen (unsharp mask) */
+  if(s.sharpen>0){
+    const id2=ctx.getImageData(0,0,w,h);
+    const d2=new Uint8ClampedArray(id2.data);
+    const bl=boxBlur(d2,w,h,1);
+    const amt=s.sharpen/8;
+    for(let i=0;i<id2.data.length;i+=4){
+      id2.data[i]  =clamp(d2[i]  +(d2[i]  -bl[i]  )*amt);
+      id2.data[i+1]=clamp(d2[i+1]+(d2[i+1]-bl[i+1])*amt);
+      id2.data[i+2]=clamp(d2[i+2]+(d2[i+2]-bl[i+2])*amt);
+    }
+    ctx.putImageData(id2,0,0);
+  }
+
+  /* 11. Vignette */
+  if(s.vignette>0){
+    const cx=w/2,cy=h/2;
+    const inner=Math.min(cx,cy)*Math.max(0,1-s.vignette/60);
+    const outer=Math.sqrt(cx*cx+cy*cy);
+    const grd=ctx.createRadialGradient(cx,cy,inner,cx,cy,outer);
+    grd.addColorStop(0,'rgba(0,0,0,0)');
+    grd.addColorStop(1,'rgba(0,0,0,'+Math.min(0.92,s.vignette/65)+')');
+    ctx.fillStyle=grd;
+    ctx.fillRect(0,0,w,h);
+  }
+}
+
+function draw(){if(!img||!ctx||!canvas)return;renderFx(ctx,canvas.width,canvas.height,img,sliders);}
+
+/* ─────────────────────────────────────────────────
+   DOWNLOAD
+───────────────────────────────────────────────── */
+function triggerFileSave(blob,filename){
+  // Microsoft Edge / IE legacy
+  if(window.navigator && window.navigator.msSaveOrOpenBlob){
+    window.navigator.msSaveOrOpenBlob(blob,filename);
+    return;
+  }
+  const isIOS=/iP(hone|ad|od)/.test(navigator.userAgent) && !window.MSStream;
+  if(isIOS){
+    // iOS Safari: `download` attribute is ignored. We use FileReader to convert
+    // to a data: URL and open it in the same window so the user can
+    // long-press → "Save to Photos" or share the image.
+    const reader=new FileReader();
+    reader.onload=function(){
+      // Show a full-screen overlay with the image and a save hint
+      const overlay=document.createElement('div');
+      overlay.id='ios-save-overlay';
+      overlay.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px;';
+      overlay.innerHTML=`
+        <div style="color:#fff;font-size:14px;font-weight:600;text-align:center;">📱 Simpan Gambar ke Perangkat</div>
+        <img src="${reader.result}" style="max-width:100%;max-height:60vh;border-radius:10px;object-fit:contain;">
+        <div style="color:#aaa;font-size:12px;text-align:center;line-height:1.6;">Tekan & tahan gambar di atas,<br>lalu pilih <b style="color:#fff;">"Tambah ke Foto"</b> atau <b style="color:#fff;">"Simpan Gambar"</b></div>
+        <button onclick="document.getElementById('ios-save-overlay').remove()" style="padding:10px 28px;border-radius:8px;border:none;background:#4f8ef7;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">✕ Tutup</button>
+      `;
+      document.body.appendChild(overlay);
+    };
+    reader.readAsDataURL(blob);
+    return;
+  }
+  // Standard modern browsers (Chrome, Firefox, Safari desktop, Edge, Android Chrome)
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=filename;
+  a.style.display='none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+
+function doDownload(mode){
+  if(!img){toast(curLang==='id'?'⚠️ Upload foto dulu':'⚠️ Upload a photo first');return;}
+  // Disable all download buttons while processing
+  ['btnHD','btn4K','btnOrig'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=true;});
+  toast(curLang==='id'?'⏳ Memproses...':'⏳ Rendering...');
+  const bar=document.getElementById('progBar'),fill=document.getElementById('progFill');
+  bar.classList.add('show');fill.style.width='0%';
+  setTimeout(()=>fill.style.width='40%',40);
+  setTimeout(()=>{
+    try{
+      let tw,th;
+      const origW=img.naturalWidth,origH=img.naturalHeight;
+      if(mode==='hd'){tw=1920;th=1080;}
+      else if(mode==='4k'){tw=3840;th=2160;}
+      else{tw=origW;th=origH;}
+
+      const asp=origW/origH;
+      let w,h;
+      if(mode==='orig'){
+        w=origW;h=origH;
+      }else{
+        // Fit within the target box while keeping aspect ratio
+        if(asp>=1){// landscape or square
+          w=tw;h=Math.round(tw/asp);
+          if(h>th){h=th;w=Math.round(th*asp);}
+        }else{// portrait
+          h=th;w=Math.round(th*asp);
+          if(w>tw){w=tw;h=Math.round(tw/asp);}
+        }
+      }
+
+      const c=document.createElement('canvas');
+      c.width=w;c.height=h;
+      const dc=c.getContext('2d',{willReadFrequently:true});
+      dc.drawImage(img,0,0,w,h);
+      renderFx(dc,w,h,img,sliders);
+      fill.style.width='80%';
+
+      const modeLabel=mode==='hd'?'HD':(mode==='4k'?'4K':'Original');
+      const filename=`studio_${modeLabel}_${w}x${h}_${Date.now()}.jpg`;
+
+      const finalize=(blob)=>{
+        fill.style.width='100%';
+        setTimeout(()=>{bar.classList.remove('show');fill.style.width='0%';},600);
+        ['btnHD','btn4K','btnOrig'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=false;});
+        triggerFileSave(blob,filename);
+        toast(curLang==='id'?`✅ Berhasil diunduh! (${w}×${h}px)`:`✅ Downloaded! (${w}×${h}px)`);
+      };
+
+      if(typeof c.toBlob==='function'){
+        c.toBlob(blob=>{
+          if(blob){finalize(blob);}
+          else{
+            // Fallback: convert dataURL to Blob manually
+            const dataURL=c.toDataURL('image/jpeg',0.95);
+            const arr=dataURL.split(','),mime=arr[0].match(/:(.*?);/)[1];
+            const bstr=atob(arr[1]);let n=bstr.length;
+            const u8=new Uint8Array(n);while(n--)u8[n]=bstr.charCodeAt(n);
+            finalize(new Blob([u8],{type:mime}));
+          }
+        },'image/jpeg',0.95);
+      }else{
+        // Old browser fallback
+        const dataURL=c.toDataURL('image/jpeg',0.95);
+        const arr=dataURL.split(','),mime=arr[0].match(/:(.*?);/)[1];
+        const bstr=atob(arr[1]);let n=bstr.length;
+        const u8=new Uint8Array(n);while(n--)u8[n]=bstr.charCodeAt(n);
+        finalize(new Blob([u8],{type:mime}));
+      }
+    }catch(e){
+      console.error('Download error:',e);
+      bar.classList.remove('show');
+      ['btnHD','btn4K','btnOrig'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=false;});
+      toast(curLang==='id'?'❌ Gagal mengunduh':'❌ Download failed');
+    }
+  },80);
+}
+
+/* ─────────────────────────────────────────────────
+   COPY WALLET — robust fallback for all contexts
+───────────────────────────────────────────────── */
+function copyWallet(){
+  const addr='Ah9kqroxTGiMH7uruBv3GUDEeLbrVkgkH6KpNX3R1Fkb';
+  function onSuccess(){
+    toast('✅ Wallet address copied!');
+    // Update ALL copy buttons (footer + desktop-injected clone)
+    document.querySelectorAll('[data-copy-wallet]').forEach(btn=>{
+      btn.textContent='Copied!';
+      setTimeout(()=>btn.textContent='Copy',2000);
+    });
+  }
+  function fallback(){
+    try{
+      const ta=document.createElement('textarea');
+      ta.value=addr;ta.style.cssText='position:fixed;opacity:0;top:0;left:0;';
+      document.body.appendChild(ta);ta.focus();ta.select();
+      const ok=document.execCommand('copy');
+      document.body.removeChild(ta);
+      if(ok)onSuccess();else toast('📋 '+addr);
+    }catch(e){toast('📋 '+addr);}
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(addr).then(onSuccess).catch(fallback);
+  }else{fallback();}
+}
+
+/* ─────────────────────────────────────────────────
+   COPY EMAIL (Contact Me)
+───────────────────────────────────────────────── */
+function copyEmail(){
+  const email='ritwan.ristanto@gmail.com';
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(email).then(()=>{
+      toast((curLang==='id'?'📧 Email disalin: ':'📧 Email copied: ')+email);
+    }).catch(()=>{
+      toast((curLang==='id'?'📧 Email: ':'📧 Email: ')+email);
+    });
+  }else{
+    toast((curLang==='id'?'📧 Email: ':'📧 Email: ')+email);
+  }
+}
+
+/* ─────────────────────────────────────────────────
+   TOAST
+───────────────────────────────────────────────── */
+let tt;
+function toast(msg){
+  const el=document.getElementById('toast');
+  if(!el)return;
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2600);
+}
+
+/* ─────────────────────────────────────────────────
+   I18N
+───────────────────────────────────────────────── */
+const I18N={
+  id:{
+    upload:'Upload',adjust:'Sesuaikan',filterPreset:'Filter & Preset',download:'Unduh',
+    filter:'Filter',export:'Ekspor',origSize:'Ukuran Asli',
+    dropTitle:'Seret & Lepas Foto',dropSub:'JPG, PNG, WEBP, GIF · Maks 20 MB',
+    choosePhoto:'Pilih Foto',resetAll:'Reset Semua',
+    tone:'Tone',color:'Warna',detail:'Detail',
+    brightness:'Kecerahan',contrast:'Kontras',saturation:'Saturasi',
+    warmth:'Kehangatan',sharpen:'Tajam',noImage:'Belum ada gambar',
+  },
+  en:{
+    upload:'Upload',adjust:'Adjust',filterPreset:'Filter & Preset',download:'Download',
+    filter:'Filter',export:'Export',origSize:'Original Size',
+    dropTitle:'Drag & Drop Photo',dropSub:'JPG, PNG, WEBP, GIF · Max 20 MB',
+    choosePhoto:'Choose Photo',resetAll:'Reset All',
+    tone:'Tone',color:'Color',detail:'Detail',
+    brightness:'Brightness',contrast:'Contrast',saturation:'Saturation',
+    warmth:'Warmth',sharpen:'Sharpen',noImage:'No image loaded',
+  }
+};
+let curLang=localStorage.getItem('sp-lang')||'en';
+
+function applyLang(lang){
+  curLang=lang;
+  localStorage.setItem('sp-lang',lang);
+  const t=I18N[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key=el.getAttribute('data-i18n');
+    if(t[key])el.textContent=t[key];
+  });
+  const langBtn=document.getElementById('langBtn');
+  if(langBtn)langBtn.textContent=lang==='id'?'EN':'ID';
+  // update imgInfo placeholder if no image
+  if(!img){
+    const el=document.getElementById('imgInfo');
+    if(el)el.textContent=t.noImage;
+  }
+  const themeBtn=document.getElementById('themeBtn');
+  if(themeBtn)themeBtn.title=lang==='id'?'Ganti tema':'Toggle theme';
+}
+
+document.getElementById('langBtn').addEventListener('click',()=>{
+  applyLang(curLang==='id'?'en':'id');
+});
+
+/* ─────────────────────────────────────────────────
+   INIT
+───────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded',()=>{
+  initCanvas();
+  initPresets();
+  applyLang(curLang);
+
+  /* Inject desktop footer inside panel */
+  const isDesktop=()=>window.innerWidth>700;
+  function injectDesktopFooter(){
+    if(!isDesktop())return;
+    const pb=document.querySelector('.panel-body');
+    if(!pb||pb.querySelector('.desktop-footer'))return;
+    const wrap=document.createElement('div');
+    wrap.className='desktop-footer';
+    wrap.innerHTML=document.getElementById('footerSection').innerHTML;
+    pb.appendChild(wrap);
+  }
+  injectDesktopFooter();
+  // Only inject once; no resize listener needed since panel is always full height on desktop
+
+  /* Sliders */
+  Object.keys(sliders).forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener('input',e=>{
+      sliders[id]=parseFloat(e.target.value);
+      const vEl=document.getElementById('val-'+id);
+      if(vEl)vEl.textContent=e.target.value;
+      draw();
+    });
+  });
+
+  /* Upload */
+  const fi=document.getElementById('fileInput');
+  const dz=document.getElementById('dropZone');
+  document.getElementById('uploadBtnBig').addEventListener('click',e=>{e.stopPropagation();fi.click();});
+  dz.addEventListener('click',()=>fi.click());
+  fi.addEventListener('change',e=>loadImage(e.target.files?.[0]));
+
+  const ca=document.getElementById('canvasArea');
+  ca.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
+  ca.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+  ca.addEventListener('drop',e=>{
+    e.preventDefault();dz.classList.remove('drag');
+    const f=e.dataTransfer.files?.[0];if(f)loadImage(f);
+  });
+
+  /* Reset (Adjust pane) */
+  document.getElementById('btnReset').addEventListener('click',()=>{
+    Object.keys(sliders).forEach(k=>sliders[k]=0);
+    syncSlidersUI();draw();
+    document.querySelectorAll('.pi').forEach(x=>x.classList.remove('on'));
+    toast(curLang==='id'?'↩ Reset':'↩ Reset');
+  });
+
+  /* Reset (Filter pane) */
+  document.getElementById('btnResetFilter').addEventListener('click',()=>{
+    Object.keys(sliders).forEach(k=>sliders[k]=0);
+    syncSlidersUI();draw();
+    document.querySelectorAll('.pi').forEach(x=>x.classList.remove('on'));
+    toast(curLang==='id'?'↩ Reset':'↩ Reset');
+  });
+
+  /* Download */
+  document.getElementById('btnHD').addEventListener('click',()=>doDownload('hd'));
+  document.getElementById('btn4K').addEventListener('click',()=>doDownload('4k'));
+  document.getElementById('btnOrig').addEventListener('click',()=>doDownload('orig'));
+
+  /* Feedback — star rating handled by dedicated feedback script below */
+
+});
+
+</script>
+
+
+
+<script>
+/* === AUTO PATCH: zoom & pan (pinch + drag) === */
+(function(){
+const canvas=document.getElementById('preview');
+if(canvas){
+ let scale=1,minScale=0.5,maxScale=8,startDist=0,startScale=1,lastX=0,lastY=0,tx=0,ty=0;
+ function applyTf(){canvas.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;canvas.style.transformOrigin='center center';}
+ function dist(a,b){return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);}
+ canvas.addEventListener('touchstart',e=>{
+   if(e.touches.length===2){startDist=dist(e.touches[0],e.touches[1]);startScale=scale;}
+   if(e.touches.length===1){lastX=e.touches[0].clientX;lastY=e.touches[0].clientY;}
+ },{passive:false});
+ canvas.addEventListener('touchmove',e=>{
+   if(e.touches.length===2){
+      e.preventDefault();
+      scale=Math.max(minScale,Math.min(maxScale,startScale*(dist(e.touches[0],e.touches[1])/startDist)));
+      applyTf();
+   }else if(e.touches.length===1 && scale>1){
+      e.preventDefault();
+      tx += e.touches[0].clientX-lastX;
+      ty += e.touches[0].clientY-lastY;
+      lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;
+      applyTf();
+   }
+ },{passive:false});
+}
+})();
+</script>
+
+<script>
+(function(){
+if(window.__v4patched)return; window.__v4patched=true;
+
+// Smaller preset cards
+const st=document.createElement('style');
+st.textContent=`
+.preset-item{min-height:58px!important}
+.presets-grid{grid-template-columns:repeat(4,1fr)!important;gap:4px!important}
+.pi-name{font-size:8px!important}
+`;
+document.head.appendChild(st);
+
+// Undo/Redo
+window.__history=[]; window.__redo=[];
+function saveState(){
+ try{
+  const vals={};
+  document.querySelectorAll('input[type=range]').forEach(r=>vals[r.id]=r.value);
+  __history.push(JSON.stringify(vals));
+  if(__history.length>20)__history.shift();
+  localStorage.setItem('editorState',JSON.stringify(vals));
+ }catch(e){}
+}
+setTimeout(()=>{
+ document.querySelectorAll('input[type=range]').forEach(r=>{
+   r.addEventListener('change',saveState);
+ });
+ const saved=localStorage.getItem('editorState');
+ if(saved){
+   try{
+     const vals=JSON.parse(saved);
+     Object.keys(vals).forEach(k=>{
+       const e=document.getElementById(k);
+       if(e){e.value=vals[k];sliders[k]=parseFloat(vals[k]);}
+       const vEl=document.getElementById('val-'+k);
+       if(vEl)vEl.textContent=vals[k];
+     });
+     if(typeof draw==='function')draw();
+   }catch(e){}
+ }
+},1000);
+
+// double tap reset zoom
+const canvas=document.getElementById('preview');
+if(canvas){
+ let last=0;
+ canvas.addEventListener('touchend',function(){
+   const now=Date.now();
+   if(now-last<300){
+      canvas.style.transform='translate(0px,0px) scale(1)';
+   }
+   last=now;
+ });
+}
+
+// (download handled by doDownload() above — see btnHD/btn4K/btnOrig listeners)
+
+// (feedback "reappear" listener removed — handled by the single feedback
+// submit handler above, no longer needed here)
+})();
+</script>
+
+</body>
+
+</html>
